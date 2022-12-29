@@ -1,14 +1,15 @@
-use std::{fs, collections::HashSet};
+use std::{collections::HashSet, hash::Hash};
 
+fn only_distinct<T: Eq + Hash>(s: &[T]) -> bool {
+    HashSet::<&T>::from_iter(s.iter()).len() == s.len()
+}
 fn main() {
-    let input = fs::read_to_string("./data/in").expect("Something went wrong with this file");
+    let input = "bvwbjplbgvbhsrlpgdmjqwftvncz";
     let slice = input.chars().collect::<Vec<char>>();
-    let mut windows = slice.windows(14);
-
-    while let Some(s) = windows.next() {
-        if s.iter().collect::<HashSet<_>>().len() == 14 {
-            break;
-        }
-    }
-    println!("{:?}", input.len() - windows.count());
+    const D: usize = 14;
+    let pos = slice
+        .windows(D)
+        .position(|w| only_distinct(w))
+        .map(|p|p+D);
+    println!("{:?}", pos);
 }
