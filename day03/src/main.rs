@@ -6,9 +6,9 @@ fn to_priority(c: char) -> Option<u32> {
     }
 
     if c.is_uppercase() {
-        return Some(c as u32 - 64 + 26);
+        Some(c as u32 - 64 + 26)
     } else {
-        return Some(c as u32 - 96);
+        Some(c as u32 - 96)
     }
 }
 

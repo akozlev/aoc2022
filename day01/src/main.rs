@@ -1,12 +1,10 @@
-use std::fs;
-
 fn main() {
-    let contents = fs::read_to_string("./data/in").expect("Something went wrong with this file");
+    let input = include_str!("../data/in");
 
-    let mut split: Vec<i32> = contents
+    let mut split: Vec<i32> = input
         .split_terminator("\n\n")
         .map(|x| {
-            x.split_terminator("\n")
+            x.split_terminator('\n')
                 .map(|y| y.parse::<i32>().unwrap())
                 .sum()
         })

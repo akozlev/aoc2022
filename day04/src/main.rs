@@ -1,41 +1,50 @@
-use std::{fs, ops::Range};
+use std::{fs, ops::RangeInclusive};
 
-fn parse_range (s: &str) -> Range<u32> {
-    s.split_once('-').map(|x| (x.0.parse::<u32>().unwrap()..x.1.parse().unwrap())).unwrap()
+trait InclusiveRangeExt {
+    fn contains_range(&self, other: &Self) -> bool;
+    fn contains_or_is_contained(&self, other: &Self) -> bool {
+        self.contains_range(other) || other.contains_range(self)
+    }
+    fn overlaps_range(&self, other: &Self) -> bool;
+    fn overlaps_or_is_overlapped(&self, other: &Self) -> bool {
+        self.overlaps_range(other) || other.overlaps_range(self)
+    }
 }
 
-fn contained<T: PartialOrd>(a: Range<T>, b: Range<T>) -> bool {
-    a.start >= b.start && a.end <= b.end || 
-        b.start >= a.start && b.end <= a.end
+impl<T> InclusiveRangeExt for RangeInclusive<T> where T: PartialOrd {
+    fn contains_range(&self, other: &Self) -> bool {
+        self.contains(other.start()) && self.contains(other.end())
+    }
+
+    fn overlaps_range(&self, other: &Self) -> bool {
+        self.contains(other.start()) || self.contains(other.end())
+    }
 }
 
-fn overlapped<T: PartialOrd>(a: Range<T>, b: Range<T>) -> bool {
-    a.start >= b.start && a.start <= b.end || 
-        a.end >= b.start && a.end <= b.end || 
-        b.start >= a.start && b.start <= a.end ||
-        b.end >= a.start && b.end <= a.end
+fn parse_range (s: &str) -> RangeInclusive<u32> {
+    s.split_once('-').map(|x| (x.0.parse::<u32>().unwrap()..=x.1.parse().unwrap())).unwrap()
 }
 
 fn main() {
     let input = fs::read_to_string("./data/in").expect("Something went wrong with this file");
 
-    let contained: Vec<_> = input
+    let contained: usize = input
         .lines()
         .into_iter()
         .map(|line| line.split_once(',').map(|elves| (parse_range(elves.0),  parse_range(elves.1))).unwrap())
-        .map(|elves| contained(elves.0, elves.1))
+        .map(|elves| elves.0.contains_or_is_contained(&elves.1))
         .filter(|&x| x)
-        .collect();
+        .count();
 
-    println!("{:?}", contained.len());
+    println!("{:?}", contained);
 
-    let overlapped: Vec<_>  = input
+    let overlapped: usize  = input
         .lines()
         .into_iter()
         .map(|line| line.split_once(',').map(|elves| (parse_range(elves.0),  parse_range(elves.1))).unwrap())
-        .map(|elves| overlapped(elves.0, elves.1))
+        .map(|elves| elves.0.overlaps_or_is_overlapped(&elves.1))
         .filter(|&x| x)
-        .collect();
+        .count();
 
-    println!("{:?}", overlapped.len());
+    println!("{:?}", overlapped);
 }

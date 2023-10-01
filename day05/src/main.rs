@@ -21,7 +21,7 @@ fn parse_move(s: &str) -> Move {
 fn parse_stack(s: &str) -> Vec<Vec<char>> {
     let mut layers = s.lines().rev();
 
-    let stack_count = layers.next().unwrap().split_whitespace().collect::<Vec<_>>().len();
+    let stack_count = layers.next().unwrap().split_whitespace().count();
 
     let layers = layers
         // .map(|x| x.chars().collect::<Vec<_>>().chunks(4).map(|y| y.iter().collect::<String>()).to_owned()).collect::<Vec<_>>();
@@ -55,7 +55,7 @@ fn main() {
     let (stack, moves) = input.split_once("\n\n").unwrap();
 
     let mut stack  = parse_stack(stack);
-    let moves: Vec<_>  = moves.lines().map(|m| parse_move(m)).collect();
+    let moves: Vec<_>  = moves.lines().map(parse_move).collect();
     for current_move in moves {
         let range = stack[current_move.from as usize].len()-current_move.amount as usize..;
         let mut boxes = stack[current_move.from as usize].drain(range).collect::<Vec<_>>();

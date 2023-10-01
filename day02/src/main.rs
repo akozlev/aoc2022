@@ -3,7 +3,7 @@ use std::fs;
 use std::str::FromStr;
 
 #[derive(PartialEq, Debug, Clone, Copy)]
-enum RPS {
+enum Move {
     Rock,
     Paper,
     Scissors,
@@ -28,57 +28,57 @@ impl FromStr for Outcome {
     }
 }
 
-impl RPS {
+impl Move {
     fn value(&self) -> i32 {
         match *self {
-            RPS::Rock => 1,
-            RPS::Paper => 2,
-            RPS::Scissors => 3,
+            Move::Rock => 1,
+            Move::Paper => 2,
+            Move::Scissors => 3,
         }
     }
-    fn from_str_tuple(s: &str) -> Result<Vec<RPS>, &'static str> {
-        let tuple: Vec<&str> = s.split_terminator(" ").collect();
-        let opponent = tuple[0].parse::<RPS>()?;
+    fn from_str_tuple(s: &str) -> Result<Vec<Move>, &'static str> {
+        let tuple: Vec<&str> = s.split_terminator(' ').collect();
+        let opponent = tuple[0].parse::<Move>()?;
         let outcome = tuple[1].parse::<Outcome>()?;
 
         Ok(vec![
             opponent,
             match (opponent, outcome) {
-                (RPS::Rock, Outcome::Lose) => RPS::Scissors,
-                (RPS::Paper, Outcome::Lose) => RPS::Rock,
-                (RPS::Scissors, Outcome::Lose) => RPS::Paper,
+                (Move::Rock, Outcome::Lose) => Move::Scissors,
+                (Move::Paper, Outcome::Lose) => Move::Rock,
+                (Move::Scissors, Outcome::Lose) => Move::Paper,
                 (same, Outcome::Draw) => same,
-                (RPS::Rock, Outcome::Win) => RPS::Paper,
-                (RPS::Paper, Outcome::Win) => RPS::Scissors,
-                (RPS::Scissors, Outcome::Win) => RPS::Rock,
+                (Move::Rock, Outcome::Win) => Move::Paper,
+                (Move::Paper, Outcome::Win) => Move::Scissors,
+                (Move::Scissors, Outcome::Win) => Move::Rock,
             },
         ])
     }
 }
 
-impl FromStr for RPS {
+impl FromStr for Move {
     type Err = &'static str;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "A" | "X" => Ok(RPS::Rock),
-            "B" | "Y" => Ok(RPS::Paper),
-            "C" | "Z" => Ok(RPS::Scissors),
+            "A" | "X" => Ok(Move::Rock),
+            "B" | "Y" => Ok(Move::Paper),
+            "C" | "Z" => Ok(Move::Scissors),
             _ => Err("bad input"),
         }
     }
 }
 
-impl PartialOrd for RPS {
+impl PartialOrd for Move {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         match (self, other) {
-            (RPS::Rock, RPS::Paper) | (RPS::Paper, RPS::Scissors) | (RPS::Scissors, RPS::Rock) => {
+            (Move::Rock, Move::Paper) | (Move::Paper, Move::Scissors) | (Move::Scissors, Move::Rock) => {
                 Some(Ordering::Less)
             }
-            (RPS::Paper, RPS::Rock) | (RPS::Scissors, RPS::Paper) | (RPS::Rock, RPS::Scissors) => {
+            (Move::Paper, Move::Rock) | (Move::Scissors, Move::Paper) | (Move::Rock, Move::Scissors) => {
                 Some(Ordering::Greater)
             }
-            (RPS::Rock, RPS::Rock) | (RPS::Paper, RPS::Paper) | (RPS::Scissors, RPS::Scissors) => {
+            (Move::Rock, Move::Rock) | (Move::Paper, Move::Paper) | (Move::Scissors, Move::Scissors) => {
                 Some(Ordering::Equal)
             }
         }
@@ -89,17 +89,17 @@ fn main() {
     let contents = fs::read_to_string("./data/in").expect("Something went wrong with this file");
 
     let split = contents
-        .split_terminator("\n")
+        .split_terminator('\n')
         // First
         // .map(
         //     x.split_terminator(" ")
-        //     .map(|x| x.parse::<RPS>().unwrap())
+        //     .map(|x| x.parse::<Move>().unwrap())
         //     .collect()
         // )
         // -----------------------------------------------------------------
         // Second
-        .map(|x| RPS::from_str_tuple(x).unwrap())
-        .map(|x: Vec<RPS>| {
+        .map(|x| Move::from_str_tuple(x).unwrap())
+        .map(|x: Vec<Move>| {
             x[1].value()
                 + match x[0].partial_cmp(&x[1]).unwrap() {
                     Ordering::Less => 6,
